@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { formatDateTimeLocal } from '@/lib/utils';
 import NoteForm from "./NoteForm";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 import { toast } from "sonner";
@@ -66,9 +67,9 @@ export default function NoteCard({ note, onNoteDeleted, onNoteUpdated }: NoteCar
       </CardContent>
       <CardFooter className="flex justify-between items-center text-xs text-gray-500">
         <div>
-          <p>Created: {new Date(note.created_at).toLocaleDateString()}</p>
+          <p>Created: {formatDateTimeLocal(note.created_at)}</p>
           {note.updated_at && new Date(note.updated_at).getTime() !== new Date(note.created_at).getTime() && (
-             <p>Updated: {new Date(note.updated_at).toLocaleDateString()}</p>
+             <p>Updated: {formatDateTimeLocal(note.updated_at)}</p>
           )}
         </div>
         <div className="flex space-x-2">
