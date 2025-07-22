@@ -1,17 +1,55 @@
-"use client";
+import { db } from "@/lib/drizzle";
+import { notes } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
+import { type Note } from "@/components/notes/NotesList";
+import EditNoteForm from "@/components/notes/EditNoteForm";
 
-import NoteForm from "@/components/notes/NoteForm";
-import { useParams } from "next/navigation";
+type DbNote = {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export default function EditNotePage() {
-  const { id } = useParams();
+async function getNote(noteId: string): Promise<Note | undefined> {
+  const dbNote: DbNote[] = await db.select().from(notes).where(eq(notes.id, noteId));
+  if (dbNote.length === 0) {
+    return undefined;
+  }
+  const note: Note = {
+    id: dbNote[0].id,
+    user_id: dbNote[0].userId,
+    title: dbNote[0].title,
+    content: dbNote[0].content,
+    created_at: dbNote[0].createdAt.toISOString(),
+    updated_at: dbNote[0].updatedAt.toISOString(),
+  };
+  return note;
+}
+
+export default async function EditNotePage({ params }: any) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login?callbackUrl=/notes");
+  }
+
+  let note;
+  if (params.id !== 'new') {
+    note = await getNote(params.id);
+  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
-        {id === 'new' ? "New Note" : "Edit Note"}
+        {params.id === 'new' ? "New Note" : "Edit Note"}
       </h1>
-      <NoteForm noteId={id as string} />
+      <EditNoteForm note={note} />
     </div>
   );
 }

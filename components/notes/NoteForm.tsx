@@ -5,7 +5,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Might use Textarea instead/also
-import { MDXEditor, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePlugin } from "@mdxeditor/editor";
+import {
+  MDXEditor,
+  headingsPlugin,
+  listsPlugin,
+  markdownShortcutPlugin,
+  quotePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
+  linkPlugin,
+  imagePlugin,
+  tablePlugin,
+  diffSourcePlugin,
+  DiffSourceToggleWrapper,
+  UndoRedo,
+  BoldItalicUnderlineToggles,
+  BlockTypeSelect,
+  CreateLink,
+  InsertImage,
+  InsertTable,
+  ListsToggle,
+  Separator,
+} from '@mdxeditor/editor';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -20,34 +41,20 @@ const noteFormSchema = z.object({
 type NoteFormValues = z.infer<typeof noteFormSchema>;
 
 interface NoteFormProps {
-  noteId: string;
+  note?: Note;
 }
 
-export default function NoteForm({ noteId }: NoteFormProps) {
+export default function NoteForm({ note }: NoteFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [note, setNote] = useState<Note | null>(null);
 
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(noteFormSchema),
     defaultValues: {
-      title: "",
-      content: "",
+      title: note?.title || "",
+      content: note?.content || "",
     },
   });
-
-  useEffect(() => {
-    if (noteId && noteId !== 'new') {
-      setIsLoading(true);
-      fetch(`/api/notes/${noteId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setNote(data);
-          form.reset(data);
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, [noteId, form]);
 
   async function onSubmit(data: NoteFormValues) {
     setIsLoading(true);
@@ -103,7 +110,34 @@ export default function NoteForm({ noteId }: NoteFormProps) {
                 <MDXEditor
                   markdown={field.value}
                   onChange={field.onChange}
-                  plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), markdownShortcutPlugin()]}
+                  plugins={[
+                    headingsPlugin(),
+                    listsPlugin(),
+                    quotePlugin(),
+                    thematicBreakPlugin(),
+                    linkPlugin(),
+                    imagePlugin(),
+                    tablePlugin(),
+                    markdownShortcutPlugin(),
+                    diffSourcePlugin({ diffMarkdown: note?.content || '' }),
+                    toolbarPlugin({
+                      toolbarContents: () => (
+                        <DiffSourceToggleWrapper>
+                          <UndoRedo />
+                          <Separator />
+                          <BoldItalicUnderlineToggles />
+                          <Separator />
+                          <ListsToggle />
+                          <Separator />
+                          <BlockTypeSelect />
+                          <Separator />
+                          <CreateLink />
+                          <InsertImage />
+                          <InsertTable />
+                        </DiffSourceToggleWrapper>
+                      ),
+                    }),
+                  ]}
                   contentEditableClassName="prose"
                   placeholder="Start writing your note here..."
                   className="dark:prose-invert dark:text-white min-h-[300px] p-4 border rounded-md"
