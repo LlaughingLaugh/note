@@ -8,7 +8,7 @@ import { z } from 'zod';
 // Zod schema for validating note creation
 const noteSchema = z.object({
   title: z.string().min(1, "Title cannot be empty.").max(255, "Title is too long."),
-  content: z.string().min(1, "Content cannot be empty.").max(10000, "Content is too long."), // Max 10k chars
+  content: z.string().min(1, "Content cannot be empty."),
 });
 
 // GET: Fetch all notes for the authenticated user
