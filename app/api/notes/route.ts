@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 // Zod schema for validating note creation
 const noteSchema = z.object({
+  title: z.string().min(1, "Title cannot be empty.").max(255, "Title is too long."),
   content: z.string().min(1, "Content cannot be empty.").max(10000, "Content is too long."), // Max 10k chars
 });
 
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await client.execute({
-      sql: "SELECT id, user_id, content, created_at, updated_at FROM notes WHERE user_id = ? ORDER BY created_at DESC;",
+      sql: "SELECT id, user_id, title, content, created_at, updated_at FROM notes WHERE user_id = ? ORDER BY created_at DESC;",
       args: [userId],
     });
     
@@ -72,13 +73,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { content } = validation.data;
+    const { title, content } = validation.data;
     const noteId = uuidv4();
     const client = getDbClient();
 
     await client.execute({
-      sql: "INSERT INTO notes (id, user_id, content, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
-      args: [noteId, userId, content]
+      sql: "INSERT INTO notes (id, user_id, title, content, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+      args: [noteId, userId, title, content]
     });
 
     // Fetch the newly created note to return it

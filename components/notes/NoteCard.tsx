@@ -60,7 +60,10 @@ export default function NoteCard({ note, onNoteDeleted, onNoteUpdated }: NoteCar
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardHeader>
+        <CardTitle>{note.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
         <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
           {note.content}
         </p>

@@ -13,6 +13,7 @@ import { useState } from "react";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 
 const noteFormSchema = z.object({
+  title: z.string().min(1, { message: "Title cannot be empty." }).max(255, { message: "Title is too long." }),
   content: z.string().min(1, { message: "Note content cannot be empty." }).max(1000, { message: "Note content is too long." }),
 });
 
@@ -31,6 +32,7 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(noteFormSchema),
     defaultValues: {
+      title: note?.title || "",
       content: note?.content || "",
     },
   });
@@ -73,10 +75,23 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Note title" {...field} disabled={isLoading} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{note ? "Edit Note" : "New Note"}</FormLabel>
+              <FormLabel>Content</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Write your note here..."

@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 // Zod schema for validating note updates
 const noteUpdateSchema = z.object({
+  title: z.string().min(1, "Title cannot be empty.").max(255, "Title is too long."),
   content: z.string().min(1, "Content cannot be empty.").max(10000, "Content is too long."),
 });
 
@@ -22,7 +23,7 @@ export async function GET(request: Request, context: any) { // Temporarily using
 
   try {
     const result = await client.execute({
-      sql: "SELECT id, user_id, content, created_at, updated_at FROM notes WHERE id = ? AND user_id = ?;",
+      sql: "SELECT id, user_id, title, content, created_at, updated_at FROM notes WHERE id = ? AND user_id = ?;",
       args: [noteId, userId]
     });
 
@@ -56,7 +57,7 @@ export async function PUT(request: Request, context: any) { // Temporarily using
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { content } = validation.data;
+    const { title, content } = validation.data;
     const client = getDbClient();
 
     // First, verify the note exists and belongs to the user
@@ -71,8 +72,8 @@ export async function PUT(request: Request, context: any) { // Temporarily using
 
     // Update the note
     await client.execute({
-      sql: "UPDATE notes SET content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?;",
-      args: [content, noteId, userId]
+      sql: "UPDATE notes SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?;",
+      args: [title, content, noteId, userId]
     });
 
     // Fetch the updated note to return it
