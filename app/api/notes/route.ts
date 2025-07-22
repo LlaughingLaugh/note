@@ -8,7 +8,7 @@ import { z } from 'zod';
 // Zod schema for validating note creation
 const noteSchema = z.object({
   title: z.string().min(1, "Title cannot be empty.").max(255, "Title is too long."),
-  content: z.string().min(1, "Content cannot be empty.").max(10000, "Content is too long."), // Max 10k chars
+  content: z.string().min(1, "Content cannot be empty."),
 });
 
 // GET: Fetch all notes for the authenticated user
@@ -28,24 +28,7 @@ export async function GET(request: Request) {
       args: [userId],
     });
     
-    const formatDate = (value: unknown): string | null => {
-      if (
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        value instanceof Date
-      ) {
-        return new Date(value).toISOString();
-      }
-      return null;
-    };
-
-    const rows = result.rows.map((r) => ({
-      ...r,
-      created_at: formatDate(r.created_at),
-      updated_at: formatDate(r.updated_at),
-    }));
-
-    return NextResponse.json(rows, { status: 200 });
+    return NextResponse.json(result.rows, { status: 200 });
   } catch (error) {
     console.error("Error fetching notes:", error);
     return NextResponse.json(

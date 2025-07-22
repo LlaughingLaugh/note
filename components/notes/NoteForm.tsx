@@ -5,27 +5,46 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Might use Textarea instead/also
-import { Textarea } from "@/components/ui/textarea"; // Added for multi-line note content
+import {
+  MDXEditor,
+  headingsPlugin,
+  listsPlugin,
+  markdownShortcutPlugin,
+  quotePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
+  linkPlugin,
+  imagePlugin,
+  tablePlugin,
+  diffSourcePlugin,
+  DiffSourceToggleWrapper,
+  UndoRedo,
+  BoldItalicUnderlineToggles,
+  BlockTypeSelect,
+  CreateLink,
+  InsertImage,
+  InsertTable,
+  ListsToggle,
+  Separator,
+} from '@mdxeditor/editor';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 
 const noteFormSchema = z.object({
   title: z.string().min(1, { message: "Title cannot be empty." }).max(255, { message: "Title is too long." }),
-  content: z.string().min(1, { message: "Note content cannot be empty." }).max(1000, { message: "Note content is too long." }),
+  content: z.string().min(1, { message: "Note content cannot be empty." }),
 });
 
 type NoteFormValues = z.infer<typeof noteFormSchema>;
 
 interface NoteFormProps {
-  note?: Note; // Optional: if provided, form is in "edit" mode
-  onFormSubmit?: () => void; // Optional: callback after successful submission (e.g., to close a dialog or refresh list)
-  onCancel?: () => void; // Optional: callback for cancel action
+  note?: Note;
 }
 
-export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps) {
+export default function NoteForm({ note }: NoteFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,12 +74,7 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
         toast.error(result.message || `Failed to ${note ? 'update' : 'create'} note.`);
       } else {
         toast.success(`Note ${note ? 'updated' : 'created'} successfully!`);
-        form.reset({ content: note && method === 'PUT' ? data.content : "" }); // Reset form, keep content if editing for now
-        if (onFormSubmit) {
-          onFormSubmit(); // Call callback
-        } else {
-          router.refresh(); // Fallback to refresh if no callback
-        }
+        router.push('/notes');
       }
     } catch (error) {
       console.error("Note form error:", error);
@@ -93,11 +107,40 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Write your note here..."
-                  className="min-h-[100px]"
-                  {...field}
-                  disabled={isLoading}
+                <MDXEditor
+                  markdown={field.value}
+                  onChange={field.onChange}
+                  plugins={[
+                    headingsPlugin(),
+                    listsPlugin(),
+                    quotePlugin(),
+                    thematicBreakPlugin(),
+                    linkPlugin(),
+                    imagePlugin(),
+                    tablePlugin(),
+                    markdownShortcutPlugin(),
+                    diffSourcePlugin({ diffMarkdown: note?.content || '' }),
+                    toolbarPlugin({
+                      toolbarContents: () => (
+                        <DiffSourceToggleWrapper>
+                          <UndoRedo />
+                          <Separator />
+                          <BoldItalicUnderlineToggles />
+                          <Separator />
+                          <ListsToggle />
+                          <Separator />
+                          <BlockTypeSelect />
+                          <Separator />
+                          <CreateLink />
+                          <InsertImage />
+                          <InsertTable />
+                        </DiffSourceToggleWrapper>
+                      ),
+                    }),
+                  ]}
+                  contentEditableClassName="prose"
+                  placeholder="Start writing your note here..."
+                  className="dark:prose-invert dark:text-white min-h-[300px] p-4 border rounded-md"
                 />
               </FormControl>
               <FormMessage />
@@ -105,11 +148,6 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
           )}
         />
         <div className="flex justify-end space-x-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-              Cancel
-            </Button>
-          )}
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (note ? "Saving..." : "Creating...") : (note ? "Save Changes" : "Create Note")}
           </Button>

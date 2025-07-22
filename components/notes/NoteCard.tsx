@@ -3,11 +3,16 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import Link from "next/link";
 import { formatDateTimeLocal } from '@/lib/utils';
 import NoteForm from "./NoteForm";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 import { toast } from "sonner";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { useRouter } from "next/navigation";
 import { Trash2, Edit3 } from 'lucide-react'; // Icons
 
@@ -64,9 +69,15 @@ export default function NoteCard({ note, onNoteDeleted, onNoteUpdated }: NoteCar
         <CardTitle>{note.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          components={{
+            div: ({ node, ...props }) => <div className="prose dark:prose-invert" {...props} />
+          }}
+        >
           {note.content}
-        </p>
+        </ReactMarkdown>
       </CardContent>
       <CardFooter className="flex justify-between items-center text-xs text-gray-500">
         <div>
@@ -76,23 +87,11 @@ export default function NoteCard({ note, onNoteDeleted, onNoteUpdated }: NoteCar
           )}
         </div>
         <div className="flex space-x-2">
-          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" aria-label="Edit note">
-                <Edit3 className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit Note</DialogTitle>
-              </DialogHeader>
-              <NoteForm
-                note={note}
-                onFormSubmit={handleNoteFormSubmit}
-                onCancel={() => setIsEditDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          <Link href={`/notes/${note.id}/edit`}>
+            <Button variant="outline" size="sm" aria-label="Edit note">
+              <Edit3 className="h-4 w-4" />
+            </Button>
+          </Link>
           <Button variant="outline" size="sm" onClick={handleDelete} disabled={isDeleting} aria-label="Delete note">
             {isDeleting ? <span className="animate-spin h-4 w-4 border-b-2 border-current rounded-full"></span> : <Trash2 className="h-4 w-4" />}
           </Button>
