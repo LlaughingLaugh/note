@@ -6,7 +6,7 @@ import NoteCard from "./NoteCard";
 import NoteForm from "./NoteForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card"; // Added Card imports
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Link from "next/link";
 import { PlusCircle } from 'lucide-react';
 import { toast } from "sonner";
 
@@ -113,22 +113,11 @@ export default function NotesList() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Your Notes</h1>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add New Note
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Note</DialogTitle>
-            </DialogHeader>
-            <NoteForm
-              onFormSubmit={handleNoteCreatedOrUpdated}
-              onCancel={() => setIsCreateDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <Link href="/notes/new/edit">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" /> Add New Note
+          </Button>
+        </Link>
       </div>
 
       {notes.length === 0 && !isLoading && (

@@ -9,7 +9,7 @@ import { MDXEditor, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePl
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 
 const noteFormSchema = z.object({
@@ -20,22 +20,34 @@ const noteFormSchema = z.object({
 type NoteFormValues = z.infer<typeof noteFormSchema>;
 
 interface NoteFormProps {
-  note?: Note; // Optional: if provided, form is in "edit" mode
-  onFormSubmit?: () => void; // Optional: callback after successful submission (e.g., to close a dialog or refresh list)
-  onCancel?: () => void; // Optional: callback for cancel action
+  noteId: string;
 }
 
-export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps) {
+export default function NoteForm({ noteId }: NoteFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
+  const [note, setNote] = useState<Note | null>(null);
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(noteFormSchema),
     defaultValues: {
-      title: note?.title || "",
-      content: note?.content || "",
+      title: "",
+      content: "",
     },
   });
+
+  useEffect(() => {
+    if (noteId !== 'new') {
+      setIsLoading(true);
+      fetch(`/api/notes/${noteId}`)
+        .then(res => res.json())
+        .then(data => {
+          setNote(data);
+          form.reset({ title: data.title, content: data.content });
+        })
+        .finally(() => setIsLoading(false));
+    }
+  }, [noteId, form]);
 
   async function onSubmit(data: NoteFormValues) {
     setIsLoading(true);
@@ -55,12 +67,7 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
         toast.error(result.message || `Failed to ${note ? 'update' : 'create'} note.`);
       } else {
         toast.success(`Note ${note ? 'updated' : 'created'} successfully!`);
-        form.reset({ content: note && method === 'PUT' ? data.content : "" }); // Reset form, keep content if editing for now
-        if (onFormSubmit) {
-          onFormSubmit(); // Call callback
-        } else {
-          router.refresh(); // Fallback to refresh if no callback
-        }
+        router.push('/notes');
       }
     } catch (error) {
       console.error("Note form error:", error);
@@ -105,11 +112,6 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
           )}
         />
         <div className="flex justify-end space-x-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-              Cancel
-            </Button>
-          )}
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (note ? "Saving..." : "Creating...") : (note ? "Save Changes" : "Create Note")}
           </Button>
