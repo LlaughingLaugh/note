@@ -1,6 +1,7 @@
 // scripts/init-db.ts
 import { initializeDb } from "../lib/db";
-import "dotenv/config";
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 async function main() {
   console.log("Starting database initialization script...");
