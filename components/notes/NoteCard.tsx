@@ -9,6 +9,10 @@ import NoteForm from "./NoteForm";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 import { toast } from "sonner";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { useRouter } from "next/navigation";
 import { Trash2, Edit3 } from 'lucide-react'; // Icons
 
@@ -66,6 +70,8 @@ export default function NoteCard({ note, onNoteDeleted, onNoteUpdated }: NoteCar
       </CardHeader>
       <CardContent>
         <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
           components={{
             div: ({ node, ...props }) => <div className="prose dark:prose-invert" {...props} />
           }}

@@ -1,20 +1,10 @@
 "use client";
 
 import NoteForm from "@/components/notes/NoteForm";
-import { useSession } from "next-auth/react";
-import { redirect, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 
 export default function EditNotePage() {
-  const { data: session, status } = useSession();
   const { id } = useParams();
-
-  if (status === "unauthenticated") {
-    redirect("/login?callbackUrl=/notes");
-  }
-
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">

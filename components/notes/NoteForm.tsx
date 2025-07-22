@@ -26,8 +26,8 @@ interface NoteFormProps {
 export default function NoteForm({ noteId }: NoteFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
   const [note, setNote] = useState<Note | null>(null);
+
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(noteFormSchema),
     defaultValues: {
@@ -37,13 +37,13 @@ export default function NoteForm({ noteId }: NoteFormProps) {
   });
 
   useEffect(() => {
-    if (noteId !== 'new') {
+    if (noteId && noteId !== 'new') {
       setIsLoading(true);
       fetch(`/api/notes/${noteId}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           setNote(data);
-          form.reset({ title: data.title, content: data.content });
+          form.reset(data);
         })
         .finally(() => setIsLoading(false));
     }
@@ -105,6 +105,8 @@ export default function NoteForm({ noteId }: NoteFormProps) {
                   onChange={field.onChange}
                   plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), markdownShortcutPlugin()]}
                   contentEditableClassName="prose"
+                  placeholder="Start writing your note here..."
+                  className="dark:prose-invert dark:text-white min-h-[300px] p-4 border rounded-md"
                 />
               </FormControl>
               <FormMessage />
