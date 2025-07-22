@@ -21,13 +21,17 @@ async function getNote(noteId: string): Promise<Note | undefined> {
   if (dbNote.length === 0) {
     return undefined;
   }
+
+  const createdAt = new Date(dbNote[0].createdAt);
+  const updatedAt = new Date(dbNote[0].updatedAt);
+  
   const note: Note = {
     id: dbNote[0].id,
     user_id: dbNote[0].userId,
     title: dbNote[0].title,
     content: dbNote[0].content,
-    created_at: dbNote[0].createdAt.toISOString(),
-    updated_at: dbNote[0].updatedAt.toISOString(),
+    created_at: !isNaN(createdAt.getTime()) ? createdAt.toISOString() : new Date().toISOString(),
+    updated_at: !isNaN(updatedAt.getTime()) ? updatedAt.toISOString() : new Date().toISOString(),
   };
   return note;
 }
