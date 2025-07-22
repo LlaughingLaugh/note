@@ -10,7 +10,6 @@ import { format, parseISO } from 'date-fns';
 export function formatDateTimeLocal(dateString: string): string {
   if (!dateString) return "";
   try {
-    const date = parseISO(dateString);
     const date = new Date(dateString.replace(" ", "T") + "Z");
     return format(date, "d MMM yyyy, h:mm a");
   } catch (error) {
