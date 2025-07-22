@@ -35,7 +35,7 @@ import type { Note } from './NotesList'; // Assuming Note type will be defined h
 
 const noteFormSchema = z.object({
   title: z.string().min(1, { message: "Title cannot be empty." }).max(255, { message: "Title is too long." }),
-  content: z.string().min(1, { message: "Note content cannot be empty." }).max(1000, { message: "Note content is too long." }),
+  content: z.string().min(1, { message: "Note content cannot be empty." }),
 });
 
 type NoteFormValues = z.infer<typeof noteFormSchema>;
