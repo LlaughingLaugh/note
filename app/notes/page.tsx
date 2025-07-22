@@ -1,5 +1,6 @@
 import NotesList from "@/components/notes/NotesList";
 import { getServerSession } from "next-auth/next";
+import '@mdxeditor/editor/style.css'
 import { authOptions } from "@/lib/authOptions"; // Updated import path
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";

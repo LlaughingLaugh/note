@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Might use Textarea instead/also
-import { Textarea } from "@/components/ui/textarea"; // Added for multi-line note content
+import { MDXEditor, headingsPlugin, listsPlugin, markdownShortcutPlugin, quotePlugin } from "@mdxeditor/editor";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -93,11 +93,11 @@ export default function NoteForm({ note, onFormSubmit, onCancel }: NoteFormProps
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Write your note here..."
-                  className="min-h-[100px]"
-                  {...field}
-                  disabled={isLoading}
+                <MDXEditor
+                  markdown={field.value}
+                  onChange={field.onChange}
+                  plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), markdownShortcutPlugin()]}
+                  contentEditableClassName="prose"
                 />
               </FormControl>
               <FormMessage />

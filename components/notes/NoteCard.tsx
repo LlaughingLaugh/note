@@ -8,6 +8,7 @@ import { formatDateTimeLocal } from '@/lib/utils';
 import NoteForm from "./NoteForm";
 import type { Note } from './NotesList'; // Assuming Note type will be defined here or in a types file
 import { toast } from "sonner";
+import ReactMarkdown from 'react-markdown';
 import { useRouter } from "next/navigation";
 import { Trash2, Edit3 } from 'lucide-react'; // Icons
 
@@ -64,9 +65,13 @@ export default function NoteCard({ note, onNoteDeleted, onNoteUpdated }: NoteCar
         <CardTitle>{note.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+        <ReactMarkdown
+          components={{
+            div: ({ node, ...props }) => <div className="prose dark:prose-invert" {...props} />
+          }}
+        >
           {note.content}
-        </p>
+        </ReactMarkdown>
       </CardContent>
       <CardFooter className="flex justify-between items-center text-xs text-gray-500">
         <div>
