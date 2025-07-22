@@ -7,7 +7,7 @@ import { z } from 'zod';
 // Zod schema for validating note updates
 const noteUpdateSchema = z.object({
   title: z.string().min(1, "Title cannot be empty.").max(255, "Title is too long."),
-  content: z.string().min(1, "Content cannot be empty.").max(10000, "Content is too long."),
+  content: z.string().min(1, "Content cannot be empty."),
 });
 
 // GET: Fetch a single note (optional, can be useful for direct linking or specific scenarios)
